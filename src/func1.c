@@ -11,8 +11,8 @@ int func1_values[20];
 void func1(void)
 {
     unsigned int i;
-    //printf("%s\n", func1_string);
-    printf("func1 \n");
+    printf("%s\n", func1_string);
+    //printf("func1 \n");
     for(i = 19; i; i--)
     {
         func1_values[i] = rand();

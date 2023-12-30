@@ -52,19 +52,25 @@ extern void * const __load_stop_overlay_data2;
 
 static void initialize_overlay()
 {
+  /* func1 */
   overlay_regions[0].load_text_start = __load_start_overlay_text1;
-  overlay_regions[0].load_text_stop = __load_start_overlay_text1;
-  overlay_regions[0].load_data_start = __load_start_overlay_data1;
-  overlay_regions[0].load_data_stop = __load_start_overlay_data1;
-  overlay_regions[0].load_bss_start = __load_start_overlay_bss1;
-  overlay_regions[0].load_bss_stop = __load_start_overlay_bss1;
+  overlay_regions[0].load_text_stop = __load_stop_overlay_text1;
 
+  overlay_regions[0].load_data_start = __load_start_overlay_data1;
+  overlay_regions[0].load_data_stop = __load_stop_overlay_data1;
+
+  overlay_regions[0].load_bss_start = __load_start_overlay_bss1;
+  overlay_regions[0].load_bss_stop = __load_stop_overlay_bss1;
+
+  /* func2 */
   overlay_regions[1].load_text_start = __load_start_overlay_text2;
-  overlay_regions[1].load_text_stop = __load_start_overlay_text2;
+  overlay_regions[1].load_text_stop = __load_stop_overlay_text2;
+
   overlay_regions[1].load_data_start = __load_start_overlay_data2;
-  overlay_regions[1].load_data_stop = __load_start_overlay_data2;
+  overlay_regions[1].load_data_stop = __load_stop_overlay_data2;
+
   overlay_regions[1].load_bss_start = __load_start_overlay_bss2;
-  overlay_regions[1].load_bss_stop = __load_start_overlay_bss2;
+  overlay_regions[1].load_bss_stop = __load_stop_overlay_bss2;
 }
 
 void load_overlay(int n)
@@ -98,11 +104,17 @@ void load_overlay(int n)
     selected_region = &overlay_regions[n-1];
 
     /* load code overlay */
+    printf("  Loading text ...\n");
+    printf("    start: %p\n", selected_region->load_text_start);
+    printf("    stop: %p\n", selected_region->load_text_stop);
     memcpy(__overlay_text,
            selected_region->load_text_start,
            selected_region->load_text_stop - selected_region->load_text_start);
 
     /* load data overlay */
+    printf("  Loading data ...\n");
+    printf("    start: %p\n", selected_region->load_data_start);
+    printf("    stop: %p\n", selected_region->load_data_stop);
     memcpy(__overlay_data,
            selected_region->load_data_start,
            selected_region->load_data_stop - selected_region->load_data_start);
@@ -110,6 +122,9 @@ void load_overlay(int n)
     /* Comment out the next line if your overlays have any static ZI variables
      * and should not be reinitialized each time, and move them out of the
      * overlay region in your scatter file */
+    printf("  Loading bss ...\n");
+    printf("    start: %p\n", selected_region->load_bss_start);
+    printf("    stop: %p\n", selected_region->load_bss_stop);
     memset(selected_region->load_bss_start,
            0,
            selected_region->load_bss_stop - selected_region->load_bss_start);

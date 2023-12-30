@@ -8,6 +8,11 @@ OUTPUT_FORMAT("elf64-littleriscv", "elf64-littleriscv",
 OUTPUT_ARCH(riscv)
 ENTRY(_start)
 SEARCH_DIR("/home/scratch/jenkins-sw/workspace/freedom-tools/redhat8-build/obj/x86_64-linux-redhat8/install/riscv64-unknown-elf-binutils-1.0.5-x86_64-linux-redhat8/riscv64-unknown-elf/lib");
+
+MEMORY
+{
+  overlay : ORIGIN = 0x00020000, LENGTH = 10K
+}
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
@@ -70,14 +75,6 @@ SECTIONS
   PROVIDE (__etext = .);
   PROVIDE (_etext = .);
   PROVIDE (etext = .);
-
-  /* text overlay */
-  __overlay_text = .;
-  OVERLAY : NOCROSSREFS
-  {
-    .overlay_text1 { func1.o(.text) }
-    .overlay_text2 { func2.o(.text) }
-  }
 
   .rodata         : { *(.rodata .rodata.* .gnu.linkonce.r.*) }
   .rodata1        : { *(.rodata1) }
@@ -171,13 +168,6 @@ SECTIONS
   }
   .data1          : { *(.data1) }
   
-  /* Data overlay */
-  __overlay_data = .;
-  OVERLAY : NOCROSSREFS
-  {
-    .overlay_data1 { func1.o(.data .sdata) }
-    .overlay_data2 { func2.o(.data .sdata) }
-  }
 
   .got            : { *(.got.plt) *(.igot.plt) *(.got) *(.igot) }
   /* We want the small data sections together, so single-instruction offsets
@@ -219,13 +209,29 @@ SECTIONS
   _end = .; PROVIDE (end = .);
   . = DATA_SEGMENT_END (.);
 
+  /* text overlay */
+  __overlay_text = .;
+  OVERLAY : NOCROSSREFS
+  {
+    .overlay_text1 { func1.o(.text) }
+    .overlay_text2 { func2.o(.text) }
+  } > overlay
+
+  /* Data overlay */
+  __overlay_data = .;
+  OVERLAY : NOCROSSREFS
+  {
+    .overlay_data1 { func1.o(.data .sdata) }
+    .overlay_data2 { func2.o(.data .sdata) }
+  } > overlay
+
   /* BSS overlay */
   __overlay_bss = .;
   OVERLAY : NOCROSSREFS
   {
     .overlay_bss1 { func1.o(.bss .sbss) }
     .overlay_bss2 { func2.o(.bss .sbss) }
-  }
+  } > overlay
 
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }
