@@ -11,8 +11,9 @@ SEARCH_DIR("/home/scratch/jenkins-sw/workspace/freedom-tools/redhat8-build/obj/x
 
 MEMORY
 {
-  overlay : ORIGIN = 0x00040000, LENGTH = 1K
-  rom     : ORIGIN = 0x00040100, LENGTH = 1K
+  overlay_code (rxw) : ORIGIN = 0x0001e000, LENGTH = 1K
+  overlay_data (rw) : ORIGIN = 0x00021000, LENGTH = 1K
+  rom     : ORIGIN = 0x00022000, LENGTH = 1K
 }
 SECTIONS
 {
@@ -69,13 +70,6 @@ SECTIONS
     /* .gnu.warning sections are handled specially by elf.em.  */
     *(.gnu.warning)
   }
-  /* text overlay */
-  code_base = .;
-  OVERLAY : NOCROSSREFS
-  {
-    .overlay_code1 { func1.o(.text) }
-    .overlay_code2 { func2.o(.text) }
-  } >overlay AT>rom
 
   .fini           :
   {
@@ -232,22 +226,30 @@ SECTIONS
   _end = .; PROVIDE (end = .);
   . = DATA_SEGMENT_END (.);
 
+  /* text overlay */
+  code_base = ORIGIN(overlay_code);
+  OVERLAY : NOCROSSREFS
+  {
+    .overlay_code1 { func1.o(.text) }
+    .overlay_code2 { func2.o(.text) }
+  } >overlay_code AT>rom
+
   /* Data overlay */
 
-  data_base = .;
+  data_base = code_base + MAX(SIZEOF(.overlay_code1), SIZEOF(.overlay_code2));
   OVERLAY : NOCROSSREFS
   {
     .overlay_data1 { func1.o(.data .sdata) }
     .overlay_data2 { func2.o(.data .sdata) }
-  } >overlay AT>rom
+  } >overlay_data AT>rom
 
   /* BSS overlay */
-  bss_base = .;
+  bss_base = data_base + MAX(SIZEOF(.overlay_data1), SIZEOF(.overlay_data2));
   OVERLAY : NOCROSSREFS
   {
     .overlay_bss1 { func1.o(.bss .sbss) }
     .overlay_bss2 { func2.o(.bss .sbss) }
-  } >overlay
+  } >overlay_data
 
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }

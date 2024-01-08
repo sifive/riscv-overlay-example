@@ -73,9 +73,9 @@ void load_overlay(int n)
      * and should not be reinitialized each time, and move them out of the
      * overlay region in your scatter file */
     printf("  Loading bss ...\n");
-    printf("    start: %p\n", bss_base);
+    printf("    start: %p\n", &bss_base);
     printf("    length: %d bytes\n", selected_region->bss_length);
-    memset(bss_base, 0, selected_region->bss_length);
+    memset(&bss_base, 0, selected_region->bss_length);
 
     /* update record of current overlay */
     current_overlay=n;
