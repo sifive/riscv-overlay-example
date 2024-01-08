@@ -11,9 +11,10 @@ SEARCH_DIR("/home/scratch/jenkins-sw/workspace/freedom-tools/redhat8-build/obj/x
 
 MEMORY
 {
-  overlay_code (rxw) : ORIGIN = 0x0001e000, LENGTH = 1K
-  overlay_data (rw) : ORIGIN = 0x00021000, LENGTH = 1K
-  rom     : ORIGIN = 0x00022000, LENGTH = 1K
+  ram          : ORIGIN = 0x0, LENGTH = 120K
+  overlay_code : ORIGIN = 0x0001e000, LENGTH = 1K
+  overlay_data : ORIGIN = 0x00021000, LENGTH = 1K
+  rom          : ORIGIN = 0x00022000, LENGTH = 1K
 }
 SECTIONS
 {
