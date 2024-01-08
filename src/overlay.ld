@@ -11,7 +11,8 @@ SEARCH_DIR("/home/scratch/jenkins-sw/workspace/freedom-tools/redhat8-build/obj/x
 
 MEMORY
 {
-  overlay : ORIGIN = 0x00020000, LENGTH = 10K
+  overlay : ORIGIN = 0x00040000, LENGTH = 1K
+  rom     : ORIGIN = 0x00040100, LENGTH = 1K
 }
 SECTIONS
 {
@@ -64,10 +65,18 @@ SECTIONS
     *(.text.startup .text.startup.*)
     *(.text.hot .text.hot.*)
     *(SORT(.text.sorted.*))
-    *(.text .stub .text.* .gnu.linkonce.t.*)
+    *(EXCLUDE_FILE (func1.o func2.o) .text .stub .text.* .gnu.linkonce.t.*)
     /* .gnu.warning sections are handled specially by elf.em.  */
     *(.gnu.warning)
   }
+  /* text overlay */
+  code_base = .;
+  OVERLAY : NOCROSSREFS
+  {
+    .overlay_code1 { func1.o(.text) }
+    .overlay_code2 { func2.o(.text) }
+  } >overlay AT>rom
+
   .fini           :
   {
     KEEP (*(SORT_NONE(.fini)))
@@ -163,8 +172,22 @@ SECTIONS
   .data           :
   {
     __DATA_BEGIN__ = .;
-    *(.data .data.* .gnu.linkonce.d.*)
+    *(EXCLUDE_FILE (func1.o func2.o) .data .data.* .gnu.linkonce.d.*)
     SORT(CONSTRUCTORS)
+    . = ALIGN(4);
+
+    overlay_regions = .;
+    QUAD(ABSOLUTE(LOADADDR(.overlay_code1)));
+    QUAD(ABSOLUTE(LOADADDR(.overlay_data1)));
+    LONG(SIZEOF(.overlay_code1));
+    LONG(SIZEOF(.overlay_data1));
+    LONG(SIZEOF(.overlay_bss1));
+
+    QUAD(ABSOLUTE(LOADADDR(.overlay_code2)));
+    QUAD(ABSOLUTE(LOADADDR(.overlay_data2)));
+    LONG(SIZEOF(.overlay_code2));
+    LONG(SIZEOF(.overlay_data2));
+    LONG(SIZEOF(.overlay_bss2));
   }
   .data1          : { *(.data1) }
   
@@ -209,29 +232,22 @@ SECTIONS
   _end = .; PROVIDE (end = .);
   . = DATA_SEGMENT_END (.);
 
-  /* text overlay */
-  __overlay_text = .;
-  OVERLAY : NOCROSSREFS
-  {
-    .overlay_text1 { func1.o(.text) }
-    .overlay_text2 { func2.o(.text) }
-  } > overlay
-
   /* Data overlay */
-  __overlay_data = .;
+
+  data_base = .;
   OVERLAY : NOCROSSREFS
   {
     .overlay_data1 { func1.o(.data .sdata) }
     .overlay_data2 { func2.o(.data .sdata) }
-  } > overlay
+  } >overlay AT>rom
 
   /* BSS overlay */
-  __overlay_bss = .;
+  bss_base = .;
   OVERLAY : NOCROSSREFS
   {
     .overlay_bss1 { func1.o(.bss .sbss) }
     .overlay_bss2 { func2.o(.bss .sbss) }
-  } > overlay
+  } >overlay
 
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }

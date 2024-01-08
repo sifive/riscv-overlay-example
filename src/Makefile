@@ -25,7 +25,7 @@ $(EXE): $(OBJ) $(LDSCRIPT)
 	$(CC) $(LDFLAGS) $(OBJ) -o $(EXE)
 
 $(DUMP): $(EXE)
-	$(OBJDUMP) --disassemble --section-headers --source $(EXE) > $@
+	$(OBJDUMP) --disassemble-all --section-headers --source $(EXE) > $@
 
 $(SYM): $(EXE)
 	$(READELF) -Ss $(EXE) > $(@)
