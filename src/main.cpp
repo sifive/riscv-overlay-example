@@ -1,10 +1,13 @@
 // main.c
 #include <stdio.h>
+#include "foo.hpp"
 
 
 /* Functions provided by the overlays */
-extern void func1(void);
-extern void func2(void);
+extern "C" {
+  extern void func1(void);
+  extern void func2(void);
+}
 
 int main(void)
 {
@@ -19,12 +22,16 @@ int main(void)
     func2();
 
     func1();
-    printf("End of main()...\n");
- 
-    return 0;
-}
 
-void foo(int x)
-{
-    return;
+    Foo myfoo;
+    printf("%s\n", myfoo.foo());
+    printf("%s\n", myfoo.bar());
+
+    Bar mybar;
+    printf("%s\n", mybar.foo());
+    printf("%s\n", mybar.bar());
+
+    printf("End of main()...\n");
+
+    return 0;
 }
