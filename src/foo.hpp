@@ -1,13 +1,13 @@
 struct Foo
 {
     // demo for normal member method
-    int foo();
+    const char* foo();
 
     // demo for virtual method
-    virtual int bar();  
+    virtual const char* bar();  
 };
 
 struct Bar: Foo
 {
-    int bar() override;
+    const char* bar() override;
 };

@@ -1,13 +1,13 @@
 #include "foo.hpp"
 
-int Foo::foo() {
-  return 1;
+const char* Foo::foo() {
+  return "Foo:foo()";
 }
 
-int Foo::bar() {
-  return 2;
+const char* Foo::bar() {
+  return "Foo:bar()";
 }
 
-int Bar::bar() {
-  return 3;
+const char* Bar::bar() {
+  return "Bar::bar()";
 }
