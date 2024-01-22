@@ -161,7 +161,6 @@ SECTIONS
   }
   .jcr            : { KEEP (*(.jcr)) }
   .data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*) }
-  .dynamic        : { *(.dynamic) }
   . = DATA_SEGMENT_RELRO_END (0, .);
 
   .data           :
@@ -170,19 +169,6 @@ SECTIONS
     *(EXCLUDE_FILE (func1.o func2.o) .data .data.* .gnu.linkonce.d.*)
     SORT(CONSTRUCTORS)
     . = ALIGN(4);
-
-    overlay_regions = .;
-    QUAD(ABSOLUTE(LOADADDR(.overlay_code1)));
-    QUAD(ABSOLUTE(LOADADDR(.overlay_data1)));
-    LONG(SIZEOF(.overlay_code1));
-    LONG(SIZEOF(.overlay_data1));
-    LONG(SIZEOF(.overlay_bss1));
-
-    QUAD(ABSOLUTE(LOADADDR(.overlay_code2)));
-    QUAD(ABSOLUTE(LOADADDR(.overlay_data2)));
-    LONG(SIZEOF(.overlay_code2));
-    LONG(SIZEOF(.overlay_data2));
-    LONG(SIZEOF(.overlay_bss2));
   }
   .data1          : { *(.data1) }
   
@@ -231,75 +217,22 @@ SECTIONS
   code_base = ORIGIN(overlay_code);
   OVERLAY : NOCROSSREFS
   {
-    .overlay_code1 { func1.o(.text) }
-    .overlay_code2 { func2.o(.text) }
+    .code_func1 { func1.o(.text) }
+    .code_func2 { func2.o(.text) }
+    .code_foo { foo.o(.text) }
   } >overlay_code AT>rom
 
   /* Data overlay */
-
-  data_base = code_base + MAX(SIZEOF(.overlay_code1), SIZEOF(.overlay_code2));
+  data_base = .;
   OVERLAY : NOCROSSREFS
   {
-    .overlay_data1 { func1.o(.data .sdata) }
-    .overlay_data2 { func2.o(.data .sdata) }
+    .data_func1 { func1.o(.data .sdata) }
+    .data_func2 { func2.o(.data .sdata) }
+    .data_foo { foo.o(.data .sdata) }
   } >overlay_data AT>rom
 
-  /* BSS overlay */
-  bss_base = data_base + MAX(SIZEOF(.overlay_data1), SIZEOF(.overlay_data2));
-  OVERLAY : NOCROSSREFS
-  {
-    .overlay_bss1 { func1.o(.bss .sbss) }
-    .overlay_bss2 { func2.o(.bss .sbss) }
-  } >overlay_data
 
-  /* Stabs debugging sections.  */
-  .stab          0 : { *(.stab) }
-  .stabstr       0 : { *(.stabstr) }
-  .stab.excl     0 : { *(.stab.excl) }
-  .stab.exclstr  0 : { *(.stab.exclstr) }
-  .stab.index    0 : { *(.stab.index) }
-  .stab.indexstr 0 : { *(.stab.indexstr) }
-  .comment 0 (INFO) : { *(.comment); LINKER_VERSION; }
-  .gnu.build.attributes : { *(.gnu.build.attributes .gnu.build.attributes.*) }
-  /* DWARF debug sections.
-     Symbols in the DWARF debugging sections are relative to the beginning
-     of the section so we begin them at 0.  */
-  /* DWARF 1.  */
-  .debug          0 : { *(.debug) }
-  .line           0 : { *(.line) }
-  /* GNU DWARF 1 extensions.  */
-  .debug_srcinfo  0 : { *(.debug_srcinfo) }
-  .debug_sfnames  0 : { *(.debug_sfnames) }
-  /* DWARF 1.1 and DWARF 2.  */
-  .debug_aranges  0 : { *(.debug_aranges) }
-  .debug_pubnames 0 : { *(.debug_pubnames) }
-  /* DWARF 2.  */
-  .debug_info     0 : { *(.debug_info .gnu.linkonce.wi.*) }
-  .debug_abbrev   0 : { *(.debug_abbrev) }
-  .debug_line     0 : { *(.debug_line .debug_line.* .debug_line_end) }
-  .debug_frame    0 : { *(.debug_frame) }
-  .debug_str      0 : { *(.debug_str) }
-  .debug_loc      0 : { *(.debug_loc) }
-  .debug_macinfo  0 : { *(.debug_macinfo) }
-  /* SGI/MIPS DWARF 2 extensions.  */
-  .debug_weaknames 0 : { *(.debug_weaknames) }
-  .debug_funcnames 0 : { *(.debug_funcnames) }
-  .debug_typenames 0 : { *(.debug_typenames) }
-  .debug_varnames  0 : { *(.debug_varnames) }
-  /* DWARF 3.  */
-  .debug_pubtypes 0 : { *(.debug_pubtypes) }
-  .debug_ranges   0 : { *(.debug_ranges) }
-  /* DWARF 5.  */
-  .debug_addr     0 : { *(.debug_addr) }
-  .debug_line_str 0 : { *(.debug_line_str) }
-  .debug_loclists 0 : { *(.debug_loclists) }
-  .debug_macro    0 : { *(.debug_macro) }
-  .debug_names    0 : { *(.debug_names) }
-  .debug_rnglists 0 : { *(.debug_rnglists) }
-  .debug_str_offsets 0 : { *(.debug_str_offsets) }
-  .debug_sup      0 : { *(.debug_sup) }
-  .gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }
-  /DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) *(.gnu.lto_*) }
+  /DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) *(.gnu.lto_*) *(.debug*) *(.stab*) *(.gnu.attributes)}
 }
 
 
